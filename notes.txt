@@ -1,0 +1,2 @@
+do unsupervised learning on qoe pattern which relates to change in qos
+in a particular cluster qoe is indicating anamoly in qos parameters
