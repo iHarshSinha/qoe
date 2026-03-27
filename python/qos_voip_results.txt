@@ -1,0 +1,4 @@
+ITGDec version 2.8.1 (r1023)
+Compile-time options: sctp dccp bursty multiport
+
+ Error opening log file 'sender_voip.log'

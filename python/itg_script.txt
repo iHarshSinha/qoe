@@ -1,0 +1,3 @@
+-a 10.0.0.5 -T UDP -E 50 -e 160 -t 30000 -l sender_voip.log
+-a 10.0.0.6 -T TCP -t 30000 -l sender_ftp.log
+-a 10.0.0.7 -T UDP -E 25 -e 1200 -t 30000 -l sender_video.log
