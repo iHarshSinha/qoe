@@ -19,12 +19,11 @@ from mininet.log import setLogLevel, info
 from mininet.link import TCLink
 from mininet.clean import cleanup
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Traffic profiles
 # QoA and Video features are stream properties — they describe what kind of
 # content is being sent, not measured by iperf. Values below are realistic
 # defaults per traffic type, matching the dataset's VLC indicator ranges.
-# ──────────────────────────────────────────────────────────────────────────────
+# 
 TRAFFIC_PROFILES = {
     "video_sd": {
         "proto": "udp", "bw": "2M", "duration": 20,
@@ -69,11 +68,6 @@ CSV_FIELDS = [
     "QoA_resolution", "QoA-bitrate", "QoA-frame_rate",
     "QoA_frame-drop", "QoA_audio-rate", "QoA_audio-drop",
 ]
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ──────────────────────────────────────────────────────────────────────────────
 
 def parse_iperf_udp(output):
     """
@@ -135,7 +129,7 @@ def run_test(src, dst_host, profile_name, test_name, writer):
 
     info(f"    [{test_name}] {src.name} -> {dst_host.name} | {profile_name} | {bw}\n")
 
-    # ── Start server ──────────────────────────────────────────────────────────
+    # Start server
     # For UDP: server writes CSV output to a log file so we can read
     # jitter + loss from it after the client finishes.
     # For TCP: plain text output is enough for bandwidth.
@@ -146,8 +140,8 @@ def run_test(src, dst_host, profile_name, test_name, writer):
         dst_host.cmd("iperf -s > /tmp/iperf_server.log 2>&1 &")
     time.sleep(1)  # let server start up
 
-    # ── Run client ────────────────────────────────────────────────────────────
-    # UDP client: plain output (not -y C) — client-side CSV omits jitter/loss
+    # Run client
+    # UDP client: plain output
     # TCP client: plain output for bandwidth parsing
     if proto == "udp":
         client_cmd = f"iperf -c {dst_ip} -u -b {bw} -t {dur}"
@@ -157,10 +151,10 @@ def run_test(src, dst_host, profile_name, test_name, writer):
     src.cmd(client_cmd)
     time.sleep(1)  # give server time to flush and write final summary
 
-    # ── Measure delay via ping ────────────────────────────────────────────────
+    # Measure delay via ping
     delay = measure_delay(src, dst_ip, count=10)
 
-    # ── Parse stats ───────────────────────────────────────────────────────────
+    # Parse stats 
     server_out = dst_host.cmd("cat /tmp/iperf_server.log")
 
     if proto == "udp":
@@ -181,7 +175,7 @@ def run_test(src, dst_host, profile_name, test_name, writer):
         jitter    = 0.0   # TCP doesn't report jitter
         loss      = 0.0   # TCP doesn't report packet loss
 
-    # ── Estimate QoA frame/audio drops from measured packet loss ─────────────
+    # Estimate QoA frame/audio drops from measured packet loss
     frame_drop = profile["QoA_frame_drop"]
     audio_drop = profile["QoA_audio_drop"]
 
@@ -193,7 +187,7 @@ def run_test(src, dst_host, profile_name, test_name, writer):
             # audio drop as a percentage of audio packets
             audio_drop = round(loss)
 
-    # ── Write CSV row ─────────────────────────────────────────────────────────
+    # Write CSV row 
     row = {
         "timestamp":          time.strftime("%Y-%m-%d %H:%M:%S"),
         "test_name":          test_name,
@@ -217,14 +211,10 @@ def run_test(src, dst_host, profile_name, test_name, writer):
     }
     writer.writerow(row)
 
-    # ── Kill server and cool down ─────────────────────────────────────────────
+    # Kill server
     dst_host.cmd("kill %iperf 2>/dev/null")
     time.sleep(2)
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Main
-# ──────────────────────────────────────────────────────────────────────────────
 
 def run():
     info("*** Cleaning up previous Mininet state\n")
@@ -265,7 +255,7 @@ def run():
     net.start()
     time.sleep(2)
 
-    # ── Test plan ─────────────────────────────────────────────────────────────
+    # Test plan
     # (src, dst, profile, label)
     # Paths chosen to exercise different parts of the topology:
     #   hD->hE / hA->hG : cross the high-loss s2->s4 backbone (35% loss)
